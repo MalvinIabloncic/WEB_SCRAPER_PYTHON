@@ -50,3 +50,7 @@ def tagSearcher(url):
 
 tagSearcher(url)
 fileWriter(url,file)
+
+#Terminal#
+#Enter a URL: https://github.com/
+#<title>GitHub: Let’s build from here · GitHub</title> <meta charset="utf-8"/>

@@ -63,34 +63,44 @@ url=url+'/'
 page=requests.get(url).text
 doc=BeautifulSoup(page,"html.parser")
 
-#page_text=doc.find_all(class_="pagination-list")
-#page_text=doc.select('li[aria-label]')
-#pages = doc.input['aria-label']
+first_page='1'
+div=doc.find(class_="css-j8u5qq")
+items=div.find_all('a',text=re.compile(first_page))
+max_nr=int(items[0].parent.next_sibling.next_sibling.next_sibling.next_sibling.next_sibling.next_sibling.text)
 
 items_found={}
 counter=0
-for pg in range(2,20):
-    url=f"http://{url_name}/d/oferte/q-iphone-14-pro-max/?page={pg}"
-    page=requests.get(url).text
-    doc=BeautifulSoup(page,"html.parser")
+for pg in range(1,max_nr+1):
+    if pg==1:
+       url=f"http://{url_name}/d/oferte/q-iphone-14-pro-max/"
+    else:
+        url=f"http://{url_name}/d/oferte/q-iphone-14-pro-max/?page={pg}"
+        page=requests.get(url).text
+        doc=BeautifulSoup(page,"html.parser")
 
-    div=doc.find(class_="css-pband8")
-    items=div.find_all(text=re.compile(phone))
+        div=doc.find(class_="css-pband8")
+        items=div.find_all(text=re.compile(phone))
   
     
-    for item in items:
-        price=item.parent.next_sibling.text
-        price_comp=price.split()
-        price_list=[]
-        for elm in price_comp:
-            if elm.isalpha()!=1:
-                price_list.append(elm)
+        for item in items:
+            price=item.parent.next_sibling.text
+            price_comp=price.split()
+            price_list=[]
+            for elm in price_comp:
+                if elm.isalpha()!=1:
+                    price_list.append(elm)
         
-        price_string=''    
-        for elm in price_list:
-            price_string=price_string+elm
-        counter=counter+1
+            price_string=''    
+            for elm in price_list:
+                price_string=price_string+elm
+            counter=counter+1
         
-        items_found[counter]={"title":item,"price":int(price_string.replace(",99",""))}
+            items_found[counter]={"title":item,"price":int(price_string.replace(",99",""))}
 
-print(items_found)
+sorted_items = sorted(items_found.items(), key = lambda x: x[1]['price'])
+
+for item in sorted_items:
+    print(item[1]['title'])
+    print(item[1]['price'])
+
+

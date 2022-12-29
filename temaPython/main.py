@@ -15,9 +15,9 @@ Packages to be installed:
 from bs4 import BeautifulSoup
 from configparser import ConfigParser
 import requests
+import re
 
-
-url = input("Enter a URL: ")
+#url = input("Enter a URL: ")
 file='file.ini'
 
 def fileWriter(url,file):
@@ -48,9 +48,49 @@ def tagSearcher(url):
     tag2=soup.meta
     print(tag1,tag2)
 
-tagSearcher(url)
-fileWriter(url,file)
+#tagSearcher(url)
+#fileWriter(url,file)
 
-#Terminal#
-#Enter a URL: https://github.com/
-#<title>GitHub: Let’s build from here · GitHub</title> <meta charset="utf-8"/>
+phone="iphone 14 pro max"
+phone_list=phone.split()
+
+url_name="olx.ro"
+url=f"http://{url_name}/d/oferte/q"
+for phn in phone_list:
+    url=url+'-'+phn
+url=url+'/'
+
+page=requests.get(url).text
+doc=BeautifulSoup(page,"html.parser")
+
+#page_text=doc.find_all(class_="pagination-list")
+#page_text=doc.select('li[aria-label]')
+#pages = doc.input['aria-label']
+
+items_found={}
+counter=0
+for pg in range(2,20):
+    url=f"http://{url_name}/d/oferte/q-iphone-14-pro-max/?page={pg}"
+    page=requests.get(url).text
+    doc=BeautifulSoup(page,"html.parser")
+
+    div=doc.find(class_="css-pband8")
+    items=div.find_all(text=re.compile(phone))
+  
+    
+    for item in items:
+        price=item.parent.next_sibling.text
+        price_comp=price.split()
+        price_list=[]
+        for elm in price_comp:
+            if elm.isalpha()!=1:
+                price_list.append(elm)
+        
+        price_string=''    
+        for elm in price_list:
+            price_string=price_string+elm
+        counter=counter+1
+        
+        items_found[counter]={"title":item,"price":int(price_string.replace(",99",""))}
+
+print(items_found)

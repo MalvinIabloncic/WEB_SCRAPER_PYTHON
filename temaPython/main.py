@@ -50,15 +50,16 @@ def tagSearcher(url):
 
 #tagSearcher(url)
 #fileWriter(url,file)
+config=ConfigParser()
+config.read(file)
 
-phone="iphone 14 pro max"
-phone_list=phone.split()
+phone=config['key_words']['phone']
+phone_list='-'.join(phone.split())
 
-url_name="olx.ro"
-url=f"http://{url_name}/d/oferte/q"
-for phn in phone_list:
-    url=url+'-'+phn
-url=url+'/'
+
+url_name=config['key_words']['url']
+url=f"http://{url_name}/d/oferte/q-{phone_list}/"
+
 
 page=requests.get(url).text
 doc=BeautifulSoup(page,"html.parser")
@@ -72,9 +73,9 @@ items_found={}
 counter=0
 for pg in range(1,max_nr+1):
     if pg==1:
-       url=f"http://{url_name}/d/oferte/q-iphone-14-pro-max/"
+       url=f"http://{url_name}/d/oferte/q-{phone_list}/"
     else:
-        url=f"http://{url_name}/d/oferte/q-iphone-14-pro-max/?page={pg}"
+        url=f"http://{url_name}/d/oferte/q-{phone_list}/?page={pg}"
         page=requests.get(url).text
         doc=BeautifulSoup(page,"html.parser")
 
@@ -102,5 +103,6 @@ sorted_items = sorted(items_found.items(), key = lambda x: x[1]['price'])
 for item in sorted_items:
     print(item[1]['title'])
     print(item[1]['price'])
+    print("")
 
 

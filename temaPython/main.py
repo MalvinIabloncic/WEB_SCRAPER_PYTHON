@@ -1,21 +1,18 @@
 '''This script opens a URL specified by the user,
 prints the title and the description meta and
 it also prints the URL into a .ini file.
-
 Functions:
 * fileWriter - writes a URL into a .ini file.
 * tagSearcher - finds and prints the title
 and the description meta of a webpage.
-
 Packages to be installed:
 * beautifulsoup4
 * configparser
-
 '''
 from bs4 import BeautifulSoup
 from configparser import ConfigParser
-import requests
-import re
+import requests, re, time, logging
+
 
 #url = input("Enter a URL: ")
 file='file.ini'
@@ -50,6 +47,7 @@ def tagSearcher(url):
 
 #tagSearcher(url)
 #fileWriter(url,file)
+logging.basicConfig(level=logging.INFO,format="request time:%(message)s")
 config=ConfigParser()
 config.read(file)
 
@@ -60,8 +58,22 @@ phone_list='-'.join(phone.split())
 url_name=config['key_words']['url']
 url=f"http://{url_name}/d/oferte/q-{phone_list}/"
 
+def get_time(function):
+    def modification(url):
+        start=time.time()
+        func = function(url)
+        end=time.time()
+        request_time=end-start
+        logging.info(request_time)
+       
+        return func
+    return modification
 
-page=requests.get(url).text
+@get_time
+def get_request(url):
+    return requests.get(url).text
+
+page=get_request(url)
 doc=BeautifulSoup(page,"html.parser")
 
 first_page='1'
@@ -76,7 +88,7 @@ for pg in range(1,max_nr+1):
        url=f"http://{url_name}/d/oferte/q-{phone_list}/"
     else:
         url=f"http://{url_name}/d/oferte/q-{phone_list}/?page={pg}"
-        page=requests.get(url).text
+        page=get_request(url)
         doc=BeautifulSoup(page,"html.parser")
 
         div=doc.find(class_="css-pband8")
@@ -96,13 +108,13 @@ for pg in range(1,max_nr+1):
                 price_string=price_string+elm
             counter=counter+1
         
-            items_found[counter]={"title":item,"price":int(price_string.replace(",99",""))}
+            items_found[counter]={"title":item,"price":int(float(price_string.replace(",99","")))}
 
 sorted_items = sorted(items_found.items(), key = lambda x: x[1]['price'])
 
 for item in sorted_items:
     print(item[1]['title'])
-    print(item[1]['price'])
+    print(f"{item[1]['price']} lei")
     print("")
 
 

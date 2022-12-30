@@ -126,7 +126,7 @@ target=config['prices']['target_price']
 if int(target)<item[1]['price']:
     print(f"The item's ({item[1]['title']}) price({item[1]['price']} lei) is bigger than {target} lei")
 else:
-    email_sender=''#a email(email's sender)
+    email_sender=config['email']['email']#a email(email's sender)
     email_password=''#a password
 
     email_receiver=''#a email(email's receiver)
@@ -148,5 +148,3 @@ else:
         smtp.sendmail(email_sender,email_receiver,em.as_string())
     
     print("An email has been sent to 'an.email@gmail.com'.")
-
-

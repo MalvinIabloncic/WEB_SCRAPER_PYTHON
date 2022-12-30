@@ -11,7 +11,8 @@ Packages to be installed:
 '''
 from bs4 import BeautifulSoup
 from configparser import ConfigParser
-import requests, re, time, logging
+import requests, re, time, logging, ssl, smtplib
+from email.message import EmailMessage
 
 
 #url = input("Enter a URL: ")
@@ -84,6 +85,7 @@ max_nr=int(items[0].parent.next_sibling.next_sibling.next_sibling.next_sibling.n
 items_found={}
 counter=0
 for pg in range(1,max_nr+1):
+
     if pg==1:
        url=f"http://{url_name}/d/oferte/q-{phone_list}/"
     else:
@@ -116,5 +118,35 @@ for item in sorted_items:
     print(item[1]['title'])
     print(f"{item[1]['price']} lei")
     print("")
+
+
+target=config['prices']['target_price']
+
+
+if int(target)<item[1]['price']:
+    print(f"The item's ({item[1]['title']}) price({item[1]['price']} lei) is bigger than {target} lei")
+else:
+    email_sender=''#a email(email's sender)
+    email_password=''#a password
+
+    email_receiver=''#a email(email's receiver)
+
+
+    subject="Price change"
+    body=f""" The phone's price is finally smaller then {target} lei"""
+
+    em=EmailMessage()
+    em['Form']=email_sender
+    em['To']=email_receiver
+    em['subject']=subject
+    em.set_content(body)
+
+    context=ssl.create_default_context()
+
+    with smtplib.SMTP_SSL('smtp.gmail.com',465, context=context) as smtp:
+        smtp.login(email_sender,email_password)
+        smtp.sendmail(email_sender,email_receiver,em.as_string())
+    
+    print("An email has been sent to 'an.email@gmail.com'.")
 
 

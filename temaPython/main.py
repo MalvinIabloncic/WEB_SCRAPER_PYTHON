@@ -124,8 +124,10 @@ for pg in range(1,max_nr+1):
         price_string=''    
         for elm in price_list:
             price_string=price_string+elm
+        if price_string=='':
+            continue
+        
         counter=counter+1
-  
         price_int=int(float(price_string.replace(",99","")))
         items_found[counter]={"title":item,"price":price_int}
 
@@ -141,7 +143,7 @@ target=config['prices']['target_price']
 
 
 if int(target)<item[1]['price']:
-    print(f"The item's ({item[1]['title']}) price({item[1]['price']} lei) is bigger than {target} lei")
+    print(f"The item's ({item[1]['title']}) price ({item[1]['price']} lei) is bigger than {target} lei")
 else:
     email_sender=config['email']['email']#an email(sender's email)
     email_password=''#a password

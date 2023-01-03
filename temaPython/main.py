@@ -11,7 +11,7 @@ Packages to be installed:
 '''
 from bs4 import BeautifulSoup
 from configparser import ConfigParser
-import requests, re, time, logging, ssl, smtplib
+import requests, re, time, logging, ssl, smtplib, argparse
 from email.message import EmailMessage
 
 
@@ -48,7 +48,17 @@ def tagSearcher(url):
 
 #tagSearcher(url)
 #fileWriter(url,file)
-logging.basicConfig(level=logging.INFO,format="request time:%(message)s")
+argParser = argparse.ArgumentParser()
+argParser.add_argument("-log", "--logging",type=str, help="logging level")
+args = argParser.parse_args()
+
+
+if args.logging==None:
+    args.logging='warning'
+
+logging.basicConfig(level=args.logging.upper(),format="request time:%(message)s\n")
+
+
 config=ConfigParser()
 config.read(file)
 
@@ -74,7 +84,10 @@ def get_time(function):
 def get_request(url):
     return requests.get(url).text
 
+if args.logging!='warning':
+    print('The request for the page number:')
 page=get_request(url)
+
 doc=BeautifulSoup(page,"html.parser")
 
 first_page='1'
@@ -90,27 +103,31 @@ for pg in range(1,max_nr+1):
        url=f"http://{url_name}/d/oferte/q-{phone_list}/"
     else:
         url=f"http://{url_name}/d/oferte/q-{phone_list}/?page={pg}"
-        page=get_request(url)
-        doc=BeautifulSoup(page,"html.parser")
+    if args.logging!='warning':
+        print(f'The request for page {pg}:')
+    page=get_request(url)
+   
+    doc=BeautifulSoup(page,"html.parser")
 
-        div=doc.find(class_="css-pband8")
-        items=div.find_all(text=re.compile(phone))
+    div=doc.find(class_="css-pband8")
+    items=div.find_all(text=re.compile(phone))
   
     
-        for item in items:
-            price=item.parent.next_sibling.text
-            price_comp=price.split()
-            price_list=[]
-            for elm in price_comp:
-                if elm.isalpha()!=1:
-                    price_list.append(elm)
+    for item in items:
+        price=item.parent.next_sibling.text
+        price_comp=price.split()
+        price_list=[]
+        for elm in price_comp:
+            if elm.isalpha()!=1:
+                price_list.append(elm)
         
-            price_string=''    
-            for elm in price_list:
-                price_string=price_string+elm
-            counter=counter+1
-        
-            items_found[counter]={"title":item,"price":int(float(price_string.replace(",99","")))}
+        price_string=''    
+        for elm in price_list:
+            price_string=price_string+elm
+        counter=counter+1
+  
+        price_int=int(float(price_string.replace(",99","")))
+        items_found[counter]={"title":item,"price":price_int}
 
 sorted_items = sorted(items_found.items(), key = lambda x: x[1]['price'])
 
@@ -126,10 +143,10 @@ target=config['prices']['target_price']
 if int(target)<item[1]['price']:
     print(f"The item's ({item[1]['title']}) price({item[1]['price']} lei) is bigger than {target} lei")
 else:
-    email_sender=config['email']['email']#a email(email's sender)
+    email_sender=config['email']['email']#an email(sender's email)
     email_password=''#a password
 
-    email_receiver=''#a email(email's receiver)
+    email_receiver=''#an email(receiver's email)
 
 
     subject="Price change"

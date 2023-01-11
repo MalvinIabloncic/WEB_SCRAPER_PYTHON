@@ -159,7 +159,7 @@ for item in sorted_items:#printing the results
 
 ###implementing a functionality that sends an email if the price of a specific item is reduced under a target price
 target=config['prices']['target_price']#a target price extracted from a .ini file
-wished_phone=input('Which phone do you want? ')
+wished_phone=input('Which phone do you want?(enter a title from the list above) ')
 
 for item in sorted_items:
     if wished_phone==item[1]['title'].text:#condition to find the right item

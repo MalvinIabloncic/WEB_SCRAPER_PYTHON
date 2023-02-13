@@ -4,6 +4,7 @@ WHY IS THIS PROGRAM USEFUL?
 
 A user can get all the prices of a product he needs in just a few of seconds instead of searching for the product by himself.
 
+
 WHAT IT DOES?
 
 *It opens a URL specified by the user, prints the title and the meta description and it also prints the URL into a .ini file. 
